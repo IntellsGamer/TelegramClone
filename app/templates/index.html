@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Telegram Web Clone</title>
+  <link rel="stylesheet" href="/static/css/telegram.css" />
+</head>
+<body class="theme-dark">
+  <div class="tg-layout">
+    <aside class="tg-sidebar">
+      <div class="tg-header">Telegram</div>
+      <input class="tg-search" placeholder="Search" />
+      <ul class="tg-chat-list">
+        <li class="tg-chat-item active"><span class="title">General</span><span class="preview">Welcome to your Python clone</span></li>
+        <li class="tg-chat-item"><span class="title">Announcements</span><span class="preview">Feature matrix ready</span></li>
+      </ul>
+    </aside>
+    <main class="tg-conversation">
+      <header class="tg-conversation-header">General</header>
+      <section class="tg-messages" id="messages">
+        <article class="bubble incoming">Hi 👋</article>
+        <article class="bubble outgoing">Running in pure Python, with FastAPI + WebSocket.</article>
+      </section>
+      <footer class="tg-input-row">
+        <input id="message-input" placeholder="Write a message..." />
+        <button id="send-btn">Send</button>
+      </footer>
+    </main>
+  </div>
+  <script>
+    const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+    const ws = new WebSocket(`${protocol}://${window.location.host}/api/stream`);
+    const input = document.getElementById('message-input');
+    const sendBtn = document.getElementById('send-btn');
+    const messages = document.getElementById('messages');
+    sendBtn.onclick = () => {
+      if (!input.value) return;
+      ws.send(JSON.stringify({message: input.value}));
+      const el = document.createElement('article');
+      el.className = 'bubble outgoing';
+      el.textContent = input.value;
+      messages.appendChild(el);
+      input.value = '';
+    };
+    ws.onmessage = (event) => {
+      const payload = JSON.parse(event.data);
+      const el = document.createElement('article');
+      el.className = 'bubble incoming';
+      el.textContent = `Echo: ${payload.payload.message}`;
+      messages.appendChild(el);
+    };
+  </script>
+</body>
+</html>
